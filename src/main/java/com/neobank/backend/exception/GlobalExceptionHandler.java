@@ -60,6 +60,14 @@ public class GlobalExceptionHandler {
                 .body(errorBody("Account is inactive", 403));
     }
 
+    // 404 — resource not found
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(
+            ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody(ex.getMessage(), 404));
+    }
+
     private Map<String, Object> errorBody(String message, int status) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
