@@ -21,6 +21,11 @@ spring:
     restart:
       enabled: true
 
+# --- JWT Configuration ---
+jwt:
+  secret: 3f8a2b1d9e4c7f0a6b3d8e2c5a9f1b4d7e0c3a6f9b2d5e8a1c4f7b0d3e6a9c20
+  expiration: 86400000
+
 server:
   port: 8080
 
