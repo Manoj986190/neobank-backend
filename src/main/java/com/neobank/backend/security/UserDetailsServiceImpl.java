@@ -18,13 +18,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                    new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
+        // Using the Builder to set the 'disabled' status
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPasswordHash())
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
+                .disabled(!user.getIsActive()) // If isActive is false, account is disabled
+                .build();
     }
 }

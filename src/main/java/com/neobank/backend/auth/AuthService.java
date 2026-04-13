@@ -37,26 +37,31 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         try {
+            // 1. Authenticate the user
             authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(), request.getPassword()));
+
+        } catch (DisabledException e) {
+            // 2. Catch specifically so it reaches GlobalExceptionHandler as a 403
+            throw new DisabledException("Account is inactive");
+
         } catch (AuthenticationException e) {
+            // 3. Catch wrong passwords/emails as a 401
             throw new BadCredentialsException("Invalid email or password");
         }
 
+        // 4. If authentication passes, fetch the user details
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
-        // BR-05: block inactive users
-        if (!user.getIsActive()) {
-            throw new DisabledException("Account is inactive");
-        }
-
+        // 5. Generate the JWT Token
         String token = jwtUtil.generateToken(
                 user.getId(),
                 user.getEmail(),
                 user.getRole().name());
 
+        // 6. Return the response
         return LoginResponse.builder()
                 .token(token)
                 .email(user.getEmail())
