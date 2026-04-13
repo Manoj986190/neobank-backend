@@ -1,6 +1,7 @@
 package com.neobank.backend.exception;
 
 import org.springframework.http.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -66,6 +67,14 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(errorBody(ex.getMessage(), 404));
+    }
+
+    // 403 — cross-user account access
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(
+                    AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(errorBody("Access denied", 403));
     }
 
     private Map<String, Object> errorBody(String message, int status) {
