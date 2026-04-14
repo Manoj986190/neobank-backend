@@ -6,6 +6,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,6 +77,18 @@ public class GlobalExceptionHandler {
                     AccessDeniedException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body(errorBody("Access denied", 403));
+    }
+
+    //422 - unprocessable overdraft
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", LocalDateTime.now());
+            body.put("status", ex.getStatusCode().value());
+            body.put("error", "Unprocessable Entity");
+            body.put("message", ex.getReason()); // This gets "Insufficient balance..."
+
+            return new ResponseEntity<>(body, ex.getStatusCode());
     }
 
     private Map<String, Object> errorBody(String message, int status) {
