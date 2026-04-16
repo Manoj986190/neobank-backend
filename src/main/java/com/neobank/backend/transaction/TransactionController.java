@@ -8,7 +8,12 @@ import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Transactions",
+     description = "Transaction history and creation")
 @RestController
 @RequestMapping("/api/accounts/{accountId}/transactions")
 @RequiredArgsConstructor
@@ -16,6 +21,8 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @Operation(summary = "Create debit or credit transaction",
+               security = @SecurityRequirement(name = "Bearer Auth"))
     @PostMapping
     public ResponseEntity<TransactionResponse> createTransaction(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -29,6 +36,8 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Get paginated transaction history",
+               security = @SecurityRequirement(name = "Bearer Auth"))
     @GetMapping
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @AuthenticationPrincipal UserDetails userDetails,
